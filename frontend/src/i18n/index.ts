@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { translateText } from '../services/translationService';
 
@@ -14,7 +15,7 @@ export function useTranslation(defaultLang = 'en') {
     try {
       return await translateText(text, language);
     } catch (e) {
-      return text; // fallback
+      return text;
     }
   };
 

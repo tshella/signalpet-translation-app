@@ -1,3 +1,4 @@
+
 import { getFromCache, saveToCache } from '../utils/cache';
 
 const API_URL = import.meta.env.VITE_TRANSLATE_API;

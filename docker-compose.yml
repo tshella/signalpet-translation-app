@@ -1,0 +1,22 @@
+#version: "3.8"
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - VITE_TRANSLATE_API=http://localhost:5000/translate
+    depends_on:
+      - libretranslate
+
+  libretranslate:
+    image: libretranslate/libretranslate
+    ports:
+      - "5000:5000"
+    environment:
+      - LANGUAGES=en,es,fr,de,pt
+    command: ["./run.sh", "--load-only", "en,es,de,pt,fr"]

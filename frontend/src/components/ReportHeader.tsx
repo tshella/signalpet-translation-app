@@ -1,4 +1,5 @@
 import { reportHeader } from "../utils/constants";
+import logo from "../static/logo.png"; // Vite-compatible image import
 
 const styles = {
     container: {
@@ -22,7 +23,7 @@ const ReportHeader = () => {
         <div style={styles.container}>
             <img
                 alt="Logo"
-                src={require("../static/logo.png")}
+                src={logo}
                 style={styles.logo}
             />
             <span style={styles.secondaryText} translate="yes">

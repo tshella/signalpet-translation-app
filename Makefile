@@ -27,5 +27,31 @@ down:
 logs:
 	docker compose logs -f
 
+status:
+	@echo "$(CYAN)📦 Service status:$(RESET)"
+	docker compose ps
+
+# ======== Developer Utilities ========
+
+test:
+	pnpm vitest run
+
+ci:
+	pnpm install
+	pnpm run build
+	pnpm run test
+
 banner:
 	@scripts/banner.sh
+
+# ======== One-click Setup ========
+
+setup:
+	@chmod +x ./scripts/setup.sh
+	@./scripts/setup.sh
+
+# ======== Danger Zone: Full Reset ========
+
+nuke:
+	@echo "$(RED)💥 Nuking all containers, volumes, and images...$(RESET)"
+	docker compose down -v --remove-orphans --rmi all

@@ -6,6 +6,7 @@ import { selectRandomObjects } from "../utils/objects";
 import { randomXrayFinding } from "../utils/strings";
 import normalFindings from "../fetches/fetchNormalFindings.json";
 import abnormalFindings from "../fetches/fetchAbnormalFindings.json";
+import TranslatedText from "./TranslatedText";
 
 const styles = {
   gap3: {
@@ -141,15 +142,8 @@ const ReportFinding = ({
             onCheckedChange={onCheckedChange}
           />
         )}
-        <div
-          style={{
-            color: checkedStatus
-              ? "text-sp-dark-blue"
-              : "text-report-light-gray ",
-          }}
-          translate="yes"
-        >
-          {finding.name}
+        <div style={{ color: checkedStatus ? "text-sp-dark-blue" : "text-report-light-gray" }}>
+          <TranslatedText>{finding.name}</TranslatedText>
         </div>
       </div>
       <div style={styles.gap25}>

@@ -1,18 +1,37 @@
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "../i18n/useTranslation";
 
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from '../i18n';
-
-interface Props {
-  text: string;
+interface TranslatedTextProps {
+  text?: string;
+  children?: React.ReactNode;
+  tag?: keyof JSX.IntrinsicElements;
 }
 
-export default function TranslatedText({ text }: Props) {
+export default function TranslatedText({
+  text,
+  children,
+  tag = "span"
+}: TranslatedTextProps) {
   const { t } = useTranslation();
-  const [translated, setTranslated] = useState(text);
+  const source = text ?? (typeof children === "string" ? children : "");
+
+  const [translated, setTranslated] = useState(source);
 
   useEffect(() => {
-    t(text).then(setTranslated);
-  }, [text]);
+    let isMounted = true;
 
-  return <span>{translated}</span>;
+    if (source) {
+      t(source).then((res) => {
+        if (isMounted) setTranslated(res);
+      });
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [source, t]);
+
+  const Component = tag;
+
+  return <Component>{translated}</Component>;
 }

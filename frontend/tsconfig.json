@@ -7,9 +7,10 @@
     "strict": true,
     "jsx": "react-jsx",
     "esModuleInterop": true,
-    "resolveJsonModule": true,                       
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vitest/globals", "jsdom"]
   },
   "include": ["src"]
 }

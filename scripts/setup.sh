@@ -1,10 +1,17 @@
 #!/bin/bash
 
-echo "Installing dependencies..."
-npm install
+echo "🔧 Cleaning up any previous containers..."
+docker compose down -v --remove-orphans
 
-echo "Building Docker containers..."
-docker-compose build
+echo "📦 Installing frontend dependencies..."
+cd frontend
+pnpm install
+cd ..
 
-echo "Launching development environment..."
-docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+echo "🐳 Building Docker containers..."
+docker compose -f docker-compose.yml -f docker-compose.override.yml build
+
+echo "🚀 Launching development environment..."
+docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
+
+echo "✅ Dev environment is up! Visit http://localhost:5173"

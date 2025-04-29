@@ -2,13 +2,17 @@
 
 services:
   frontend:
-    build: .
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
     ports:
       - "5173:5173"
     volumes:
-      - .:/app
+      - ./frontend:/app
       - /app/node_modules
     environment:
+      - NODE_ENV=development
       - VITE_TRANSLATE_API=http://localhost:5000/translate
     depends_on:
       - libretranslate
@@ -19,4 +23,4 @@ services:
       - "5000:5000"
     environment:
       - LANGUAGES=en,es,fr,de,pt
-    command: ["./run.sh", "--load-only", "en,es,de,pt,fr"]
+    command: ["--load-only", "en,es,de,pt,fr"]

@@ -7,9 +7,10 @@ services:
       dockerfile: Dockerfile
       target: prod
     volumes:
-      - frontend_dist:/usr/share/nginx/html 
+      - frontend_dist:/usr/share/nginx/html
     environment:
       - NODE_ENV=production
+      - VITE_TRANSLATE_API=http://libretranslate:5000/translate  # Internal Docker host
     depends_on:
       - libretranslate
 
@@ -29,6 +30,7 @@ services:
       - "5000:5000"
     environment:
       - LANGUAGES=en,es,fr,de,pt
+    command: ["--load-only", "en,es,de,pt,fr"]
 
 volumes:
   frontend_dist:

@@ -13,7 +13,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - VITE_TRANSLATE_API=http://localhost:5000/translate
+      - VITE_TRANSLATE_API=http://localhost:5000/translate  # Host-visible for browser
     depends_on:
       - libretranslate
 

@@ -1,0 +1,15 @@
+FROM libretranslate/libretranslate:latest
+
+# Switch to root to install required tools
+USER root
+
+RUN apt-get update && apt-get install -y wget unzip && rm -rf /var/lib/apt/lists/*
+
+# Copy models into container
+COPY ./argos-models-packages/*.argosmodel /opt/models/
+
+# Install translation models using LibreTranslate's virtualenv
+RUN /app/venv/bin/python3 -m argostranslate.package install /opt/models/*.argosmodel
+
+# Revert back to LibreTranslate user
+USER libretranslate

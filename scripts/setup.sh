@@ -7,36 +7,32 @@ RESET='\033[0m'
 
 echo -e "${CYAN}🔧 Starting setup process...${RESET}"
 
-# Step 1: Install dependencies
+# Step 1: Install frontend dependencies
 echo -e "${CYAN}📦 Installing frontend dependencies...${RESET}"
 cd frontend || exit 1
 pnpm install || { echo -e "${RED}❌ Failed to install dependencies.${RESET}"; exit 1; }
 cd ..
 
-# Step 2: Start services
+# Step 2: Start Docker services
 echo -e "${CYAN}🚀 Starting Docker services...${RESET}"
-docker compose up -d
+docker compose up -d || { echo -e "${RED}❌ Failed to start Docker containers.${RESET}"; exit 1; }
 
-# Step 3: Wait for LibreTranslate to be healthy
-echo -e "${CYAN}⏳ Waiting for LibreTranslate to be healthy...${RESET}"
-SERVICE_NAME="libretranslate"
-HEALTHY="unhealthy"
-TIMEOUT=60
-ELAPSED=0
+# Step 3: Live logs while waiting
+echo -e "${CYAN}📡 Streaming logs from LibreTranslate while checking status...${RESET}"
+docker compose logs --tail=20 -f libretranslate &
+LOG_PID=$!
 
-while [ "$HEALTHY" != "healthy" ]; do
-  HEALTHY=$(docker inspect -f '{{.State.Health.Status}}' signalpet-translation-app-libretranslate-1 2>/dev/null || echo "starting")
-  if [ "$HEALTHY" == "healthy" ]; then
-    echo -e "${GREEN}🟢 LibreTranslate is healthy and ready!${RESET}"
-    break
-  fi
-  if [ "$HEALTHY" == "unhealthy" ] && [ $ELAPSED -ge $TIMEOUT ]; then
-    echo -e "${RED}❌ LibreTranslate failed to become healthy in time.${RESET}"
-    exit 1
-  fi
-  echo "⌛ LibreTranslate status: $HEALTHY"
+# Step 4: Wait for LibreTranslate to be responsive
+echo -e "${CYAN}⏳ Waiting for LibreTranslate to start responding...${RESET}"
+for i in {1..20}; do
+  curl -s http://localhost:5000/health > /dev/null && {
+    kill $LOG_PID
+    echo -e "${GREEN}✅ LibreTranslate is running!${RESET}"
+    exit 0
+  }
   sleep 3
-  ((ELAPSED+=3))
 done
 
-echo -e "${GREEN}✅ Setup complete. Happy coding!${RESET}"
+kill $LOG_PID
+echo -e "${RED}❌ LibreTranslate failed to respond in time.${RESET}"
+exit 1

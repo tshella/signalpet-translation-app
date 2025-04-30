@@ -1,0 +1,11 @@
+{
+    "dev-key": {
+      "name": "Development Key",
+      "enabled": true
+    },
+    "prod-key": {
+      "name": "Production Key",
+      "enabled": true
+    }
+  }
+  

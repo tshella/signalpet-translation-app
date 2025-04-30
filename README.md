@@ -51,7 +51,13 @@ Languages supported out of the box:
                                  ▼
                     ┌────────────────────────────┐
                     │  LibreTranslate Container   │
-                    │    REST API for Language    │
+                    │   with Hybrid Model Loader  │
+                    └────────────────────────────┘
+                                 │
+                                 ▼
+                    ┌────────────────────────────┐
+                    │        Entrypoint.sh        │
+                    │ Auto install models + start │
                     └────────────────────────────┘
                                  │
                                  ▼
@@ -76,27 +82,27 @@ Languages supported out of the box:
 
     ✅ Automated setup via make setup
 
-    ✅ Clean Docker development/production separation
+    ✅ Local + fallback Argos translation models
 
-    ✅ CI/CD via GitHub Actions
+    ✅ Clean Docker dev/prod separation
+
+    ✅ CI/CD ready with GitHub Actions
 
 🚀 Getting Started (For Everyone)
 
-No installation needed. Just run:
-
 make setup
 
-🔧 This will:
+This will:
 
-    Stop any running containers
+    Fix permissions on downloaded models
 
-    Install frontend dependencies with pnpm
+    Install frontend dependencies with PNPM
 
-    Build Docker images
+    Build and start Docker containers
 
-    Launch your development environment
+    Verify LibreTranslate and translation is working
 
-Then visit 👉 http://localhost:5173
+👉 Open your browser to: http://localhost:5173
 🔧 Developer Setup
 📦 Requirements
 
@@ -106,82 +112,78 @@ Then visit 👉 http://localhost:5173
 
     Node.js ≥ 18
 
-🛠 Manual Setup
+🛠 Manual Dev Run
 
 pnpm install
 pnpm run dev
 
-Then open http://localhost:5173
+Open: http://localhost:5173
 🛠️ Commands & Makefile
 Command	Description
-make setup	Full clean install + boot the dev environment
-make dev	Launch the app in development mode
-make prod	Build and run production with NGINX
-make down	Stop and remove all containers
-make logs	Follow Docker logs
-make status	Check running containers
-make test	Run Vitest unit tests
-make ci	Simulate CI (build + test)
-make nuke	💣 Remove containers, volumes, and images
+make setup	One-click install + boot + verify translation
+make dev	Start dev env with hot reload
+make prod	Run in production with NGINX
+make down	Stop and remove containers
+make logs	Show live logs
+make status	See container status
+make test	Run frontend unit tests via Vitest
+make ci	Run CI-like steps: install, build, test
+make nuke	💣 Remove all volumes/images (hard reset)
 📦 Docker Compose Setup
 🧪 Development
 
 make dev
 
-    Frontend served at: http://localhost:5173
+    Frontend: http://localhost:5173
 
-    LibreTranslate API: http://localhost:5000
+    API: http://localhost:5000/translate
 
-🏗️ Production
+🏗 Production
 
 make prod
 
-App is bundled and served via NGINX at:
+    Served via NGINX at: http://localhost
 
-👉 http://localhost
 ✅ Running Tests & CI
 🔬 Local Tests
 
 make test
 
-🧪 CI Simulation
+🧪 Simulate CI
 
 make ci
 
-    Includes install, build, and test steps.
-
+Runs: install → build → test
 🧬 GitHub Actions
 
-CI pipeline is triggered on push to main.
-
+CI triggered on push to main
 File: .github/workflows/ci.yml
 📸 Screenshots
-Language Selector	English Report	Translated Report (French)
-	
-	
-
-    Add screenshots under frontend/docs and link here.
-
+Language Switcher	English Report	French Translation
+Add your images under frontend/docs and link here		
 📄 License
 
 MIT License.
-Feel free to fork and build your own SIGNAL-powered translation apps!
+
+    Fork, enhance, and build your own SIGNAL-powered translation apps!
+
 🚧 Future Improvements
 Feature	Status
 🌒 Dark mode	⏳ In planning
-🔄 Language progress spinner	✅ Done
+🔄 Language spinner	✅ Done
 🌍 GitHub Pages deploy	⏳ Planned
-🔐 API key / rate limit UI	⏳ Planned
-🧪 Full e2e testing setup	⏳ Upcoming
+🔐 API key / rate limiting	⏳ Planned
+🧪 Full e2e testing	⏳ Upcoming
 💡 Final Notes
 
-    Everything runs inside Docker. No need to install Node or dependencies manually.
+    Everything runs in Docker — no need to install Node or Python.
 
-    Translations are cached locally to reduce repeated API calls.
+    Translations are cached for performance.
 
-    Zustand is used for central language state.
+    Zustand is used for global language state.
+
+    Entrypoint handles hybrid model loading (online + offline).
+
+    Clean builds with make nuke && make setup
 
 ❤️ Built for scalable, multilingual healthcare tools.
-
-
----

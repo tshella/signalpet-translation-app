@@ -1,7 +1,10 @@
 FROM libretranslate/libretranslate:latest
 
-COPY ./argos-models-packages/*.argosmodel /opt/models/
-COPY ./entrypoint.sh /app/entrypoint.sh
+RUN mkdir -p /app/models
 
+COPY ./argos-models-packages/*.argosmodel /app/models/
+RUN /app/venv/bin/python3 -m argostranslate.package install /app/models/*.argosmodel
+
+COPY ./entrypoint.sh /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]

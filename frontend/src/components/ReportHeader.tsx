@@ -6,7 +6,7 @@ const styles = {
   container: {
     backgroundColor: "#064c60",
     display: "flex",
-    flexDirection: "row" as "row",
+    flexDirection: "row" as const,
     justifyContent: "space-between",
     padding: "1rem",
     width: "100%",
@@ -24,7 +24,7 @@ const ReportHeader = () => {
     <div style={styles.container}>
       <img alt="Logo" src={logo} style={styles.logo} />
       <span style={styles.secondaryText}>
-        <TranslatedText>{reportHeader.secondaryText}</TranslatedText>
+        <TranslatedText text={reportHeader.secondaryText} />
       </span>
     </div>
   );

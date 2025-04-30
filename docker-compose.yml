@@ -1,3 +1,4 @@
+# Development Docker Compose
 #version: "3.8"
 
 services:
@@ -13,14 +14,21 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - VITE_TRANSLATE_API=http://localhost:5000/translate  # Host-visible for browser
+      - VITE_TRANSLATE_API=http://localhost:5000/translate
     depends_on:
-      - libretranslate
+      libretranslate:
+        condition: service_healthy
 
   libretranslate:
-    image: libretranslate/libretranslate
+    image: argosopentech/libretranslate:latest
     ports:
       - "5000:5000"
     environment:
       - LANGUAGES=en,es,fr,de,pt
-    command: ["--load-only", "en,es,de,pt,fr"]
+    command: ["--load-only", "en,es,fr,de,pt"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

@@ -1,40 +1,55 @@
-import { useState, useEffect } from 'react';
 import { translateText } from '../services/translationService';
+import { useLanguageStore } from '../store/languageStore';
 
 /**
- * Hook-based translation function for dynamic content.
+ * Supported languages list
  */
-export function useTranslation(defaultLang = 'en') {
-  const [language, setLanguage] = useState(
-    localStorage.getItem('preferredLanguage') || defaultLang
-  );
+const SUPPORTED_LANGUAGES = ['en', 'de', 'fr', 'es', 'pt'];
 
-  useEffect(() => {
-    localStorage.setItem('preferredLanguage', language);
-  }, [language]);
+/**
+ * Detects the user's browser language and normalizes it.
+ * Falls back to 'en' if not supported.
+ */
+export function detectBrowserLanguage(): string {
+  const browserLang = navigator.language.slice(0, 2);
+  return SUPPORTED_LANGUAGES.includes(browserLang) ? browserLang : 'en';
+}
+
+/**
+ * Hook for React components — returns async t()
+ */
+export function useTranslation() {
+  const { currentLang } = useLanguageStore();
 
   const t = async (text: string): Promise<string> => {
+    if (!text || currentLang === 'en') return text;
     try {
-      return await translateText(text, language);
-    } catch (e) {
+      return await translateText(text, currentLang);
+    } catch {
       return text;
     }
   };
 
-  return { t, language, setLanguage };
+  return { t, language: currentLang };
 }
 
 /**
- * DOM-level translation for static HTML using translate="yes".
+ * For static DOM content (e.g. span[translate="yes"])
  */
-export async function changeLanguage(lang: string): Promise<void> {
-  const elements = document.querySelectorAll<HTMLElement>("[translate='yes']");
+export async function changeLanguage(newLang: string): Promise<void> {
+  const safeLang = SUPPORTED_LANGUAGES.includes(newLang) ? newLang : 'en';
 
+  const elements = document.querySelectorAll<HTMLElement>('[translate="yes"]');
   for (const el of elements) {
-    const original = el.innerText;
-    const translated = await translateText(original, lang);
-    el.innerText = translated;
+    const original = el.dataset.original || el.innerText;
+    try {
+      const translated = await translateText(original, safeLang);
+      el.innerText = translated;
+      el.dataset.original = original;
+    } catch {
+      console.warn(`Failed to translate: "${original}"`);
+    }
   }
 
-  localStorage.setItem('preferredLanguage', lang);
+  localStorage.setItem('preferredLanguage', safeLang);
 }

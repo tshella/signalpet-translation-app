@@ -1,3 +1,4 @@
+# Production Docker Compose
 #version: "3.8"
 
 services:
@@ -6,13 +7,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: prod
-    volumes:
-      - frontend_dist:/usr/share/nginx/html
     environment:
       - NODE_ENV=production
-      - VITE_TRANSLATE_API=http://libretranslate:5000/translate  # Internal Docker host
+      - VITE_TRANSLATE_API=http://libretranslate:5000/translate
+    volumes:
+      - frontend_dist:/usr/share/nginx/html
     depends_on:
-      - libretranslate
+      libretranslate:
+        condition: service_healthy
 
   nginx:
     image: nginx:alpine
@@ -25,12 +27,18 @@ services:
       - frontend
 
   libretranslate:
-    image: libretranslate/libretranslate
+    image: argosopentech/libretranslate:latest
     ports:
       - "5000:5000"
     environment:
       - LANGUAGES=en,es,fr,de,pt
-    command: ["--load-only", "en,es,de,pt,fr"]
+    command: ["--load-only", "en,es,fr,de,pt"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
   frontend_dist:

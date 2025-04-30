@@ -185,8 +185,3 @@ Feature	Status
 
 
 ---
-
-Let me know if you want me to:
-- Add badges (coverage, Docker pulls, etc.)
-- Generate the actual screenshots (EN, FR, Language Selector)
-- Create a `CONTRIBUTING.md` or GitHub Pages deployment workflow

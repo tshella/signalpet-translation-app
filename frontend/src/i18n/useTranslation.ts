@@ -1,7 +1,6 @@
 import { useLanguageStore } from "../store/languageStore";
 import { translateText } from "../services/translationService";
 
-
 export function useTranslation() {
   const currentLang = useLanguageStore((state) => state.currentLang);
 
@@ -15,5 +14,8 @@ export function useTranslation() {
     }
   };
 
-  return { t, lang: currentLang };
+  return {
+    t,
+    language: currentLang,
+  };
 }

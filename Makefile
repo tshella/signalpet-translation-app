@@ -61,19 +61,28 @@ setup:
 	@chmod +x scripts/*.sh
 	@scripts/setup.sh
 
+# ======== Health Check with Fallback ========
+
 wait-libretranslate:
 	@echo "$(CYAN)⏳ Waiting for LibreTranslate to be healthy...$(RESET)"
 	@timeout 180s bash -c '\
 		while true; do \
 			status=$$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/health || echo "down"); \
 			if [ "$$status" = "200" ]; then \
-				echo "$(GREEN)🚀 LibreTranslate is healthy and responding!$(RESET)"; \
+				echo "$(GREEN)🚀 LibreTranslate is healthy and responding at /health!$(RESET)"; \
+				break; \
+			elif curl -s http://localhost:5000/ | grep -q "LibreTranslate"; then \
+				echo "$(YELLOW)⚠️ /health missing, but LibreTranslate is responding at / — continuing...$(RESET)"; \
 				break; \
 			else \
 				echo "⌛ Still waiting... LibreTranslate status: $$status"; \
 				sleep 5; \
 			fi; \
-		done'
+		done' || { \
+			echo "$(RED)❌ Timeout: LibreTranslate did not respond at /health or /. Exiting.$(RESET)"; \
+			docker compose logs --tail=50 libretranslate; \
+			exit 1; \
+		}
 
 # ======== Danger Zone: Full Reset ========
 

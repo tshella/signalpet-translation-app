@@ -58,13 +58,14 @@ setup:
 	sudo chown -R $(whoami):$(id -gn) argos-models-packages
 	chmod -R 755 argos-models-packages
 	chmod +x entrypoint.sh
+	@chmod +x scripts/*.sh
 	@scripts/setup.sh
 
 wait-libretranslate:
 	@echo "$(CYAN)⏳ Waiting for LibreTranslate to be healthy...$(RESET)"
 	@timeout 180s bash -c '\
 		while true; do \
-			status=$$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/ || echo "down"); \
+			status=$$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/health || echo "down"); \
 			if [ "$$status" = "200" ]; then \
 				echo "$(GREEN)🚀 LibreTranslate is healthy and responding!$(RESET)"; \
 				break; \

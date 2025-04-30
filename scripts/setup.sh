@@ -13,26 +13,34 @@ cd frontend || exit 1
 pnpm install || { echo -e "${RED}❌ Failed to install dependencies.${RESET}"; exit 1; }
 cd ..
 
-# Step 2: Start Docker services
-echo -e "${CYAN}🚀 Starting Docker services...${RESET}"
-docker compose up -d || { echo -e "${RED}❌ Failed to start Docker containers.${RESET}"; exit 1; }
+# Step 2: Ensure correct permissions on models
+chmod -R 755 argos-models-packages
 
-# Step 3: Live logs while waiting
+# Step 3: Start Docker services
+echo -e "${CYAN}🚀 Starting Docker services...${RESET}"
+docker compose up -d --build || { echo -e "${RED}❌ Failed to start Docker containers.${RESET}"; exit 1; }
+
+# Step 4: Wait for LibreTranslate
 echo -e "${CYAN}📡 Streaming logs from LibreTranslate while checking status...${RESET}"
-docker compose logs --tail=20 -f libretranslate &
+docker compose logs -f libretranslate &
 LOG_PID=$!
 
-# Step 4: Wait for LibreTranslate to be responsive
-echo -e "${CYAN}⏳ Waiting for LibreTranslate to start responding...${RESET}"
-for i in {1..20}; do
-  curl -s http://localhost:5000/health > /dev/null && {
-    kill $LOG_PID
-    echo -e "${GREEN}✅ LibreTranslate is running!${RESET}"
-    exit 0
-  }
-  sleep 3
+echo -e "${CYAN}⏳ Waiting for LibreTranslate to start responding on /health...${RESET}"
+TIMEOUT=180
+RETRY_INTERVAL=5
+ELAPSED=0
+
+until curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/health | grep -q "200"; do
+  if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+    echo -e "${RED}❌ LibreTranslate failed to respond after $TIMEOUT seconds.${RESET}"
+    kill "$LOG_PID"
+    exit 1
+  fi
+  echo "⌛ Still waiting... ($ELAPSED/$TIMEOUT sec)"
+  docker compose logs --tail=10 libretranslate
+  sleep "$RETRY_INTERVAL"
+  ((ELAPSED+=RETRY_INTERVAL))
 done
 
-kill $LOG_PID
-echo -e "${RED}❌ LibreTranslate failed to respond in time.${RESET}"
-exit 1
+kill "$LOG_PID"
+echo -e "${GREEN}✅ LibreTranslate is healthy and responding!${RESET}"

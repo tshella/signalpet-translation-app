@@ -16,15 +16,13 @@ up:
 
 dev:
 	@chmod +x scripts/*.sh
-	@chmod -R 755 argos-models-packages || true
 	@$(MAKE) banner
-	docker compose -f docker-compose.yml -f docker-compose.override.yml up --build -d
+	docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
 	@$(MAKE) wait-libretranslate
 	@echo "$(GREEN)✅ Dev environment ready!$(RESET)"
 
 prod:
 	@chmod +x scripts/*.sh
-	@chmod -R 755 argos-models-packages || true
 	@$(MAKE) banner
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
 	@$(MAKE) wait-libretranslate
@@ -56,24 +54,22 @@ banner:
 # ======== One-click Setup ========
 
 setup:
-	@chmod +x scripts/*.sh
-	@chmod -R 755 argos-models-packages || true
+	@echo "\033[0;36m🔐 Setting permissions on argos-models-packages...\033[0m"
+	sudo chown -R $(whoami):$(id -gn) argos-models-packages
+	chmod -R 755 argos-models-packages
+	chmod +x entrypoint.sh
 	@scripts/setup.sh
-	@$(MAKE) wait-libretranslate
-	@echo "$(GREEN)🟢 Setup complete and LibreTranslate is running!$(RESET)"
-
 
 wait-libretranslate:
 	@echo "$(CYAN)⏳ Waiting for LibreTranslate to be healthy...$(RESET)"
-	@timeout 60s bash -c '\
+	@timeout 180s bash -c '\
 		while true; do \
-			status=$$(docker inspect -f "{{.State.Running}}" signalpet-translation-app-libretranslate-1 2>/dev/null); \
-			if [ "$$status" = "true" ]; then \
-				echo "$(GREEN)🚀 LibreTranslate container is running!$(RESET)"; \
+			status=$$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/ || echo "down"); \
+			if [ "$$status" = "200" ]; then \
+				echo "$(GREEN)🚀 LibreTranslate is healthy and responding!$(RESET)"; \
 				break; \
 			else \
-				echo "⌛ LibreTranslate status: $$status"; \
-				docker compose logs --tail=10 libretranslate; \
+				echo "⌛ Still waiting... LibreTranslate status: $$status"; \
 				sleep 5; \
 			fi; \
 		done'

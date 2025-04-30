@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   frontend:
     build:
@@ -33,6 +35,14 @@ services:
       - LT_API_KEYS_FILE=/app/api_keys.json
     volumes:
       - ./api_keys.json:/app/api_keys.json:ro
+    command: >
+      bash -c "
+        libretranslate || (
+          echo '[⚠] LibreTranslate failed to fetch models online. Falling back to offline models...' &&
+          /app/venv/bin/python3 -m argostranslate.package install /opt/models/*.argosmodel &&
+          libretranslate
+        )
+      "
 
 volumes:
   frontend_dist:
